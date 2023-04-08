@@ -14,11 +14,11 @@ export function configureBot(bot: Telegraf<Context<Update>>) {
   const userInfoService = new UserInfoService(userStatusService);
 
   bot.start(async (ctx) => {
+    await userStatusService.setUserStatus(ctx.chat.id, "writing_bio");
+
     ctx.reply(
       "Привет! Перед тем как начать общаться нужно написать какое-то описание себя. Оно должно быть от 10 до 400 символов (пробелы считаются)."
     );
-
-    await userStatusService.setUserStatus(ctx.chat.id, "writing_bio");
   });
 
   bot.command("search", async (ctx) => {
@@ -30,14 +30,12 @@ export function configureBot(bot: Telegraf<Context<Update>>) {
     }
 
     if (userStatus) {
-      ctx.reply("Вы уже в разговоре или находитесь в очереди");
+      ctx.reply("Ты уже в разговоре или находишься в очереди");
       return;
     }
 
     const user1 = ctx.chat.id;
     const user2 = await queueService.search(ctx.chat.id);
-
-    ctx.reply("Вы добавлены в очередь");
 
     if (user2) {
       await connectionsService.setConnection(user1, Number(user2));
@@ -45,8 +43,8 @@ export function configureBot(bot: Telegraf<Context<Update>>) {
       const bioUser1 = await userInfoService.getInfoById(user1);
       const bioUser2 = await userInfoService.getInfoById(Number(user2));
 
-      ctx.reply("Собеседник найден");
-      bot.telegram.sendMessage(user2, "Собеседник найден");
+      await ctx.reply("Собеседник найден");
+      await bot.telegram.sendMessage(user2, "Собеседник найден");
 
       if (bioUser2) {
         ctx.reply("Описание собеседника: \n" + bioUser2.bio);
@@ -58,6 +56,8 @@ export function configureBot(bot: Telegraf<Context<Update>>) {
           "Описание собеседника: \n" + bioUser1.bio
         );
       }
+    } else {
+      ctx.reply("Ты был/а добавлен/а в очередь");
     }
   });
 
@@ -71,13 +71,14 @@ export function configureBot(bot: Telegraf<Context<Update>>) {
     }
 
     if (userStatus === "searching") {
+      await queueService.deleteUserFromQueue(userId);
       ctx.reply("Поиск прекращён");
-      queueService.deleteUserFromQueue(userId);
+
       return;
     }
 
     if (!userStatus) {
-      ctx.reply("Вы не находитесь в разговоре");
+      ctx.reply("Ты не находишься в разговоре");
       return;
     }
 
