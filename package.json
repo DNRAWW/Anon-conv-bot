@@ -6,16 +6,20 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\"",
-    "start": "node dist/index"
+    "start": "node dist/index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^16.0.3",
+    "mongoose": "^7.0.3",
     "redis": "^4.6.5",
     "telegraf": "^4.12.2"
   },
   "devDependencies": {
+    "@types/node": "^18.15.11",
     "concurrently": "^8.0.1",
-    "nodemon": "^2.0.22"
+    "nodemon": "^2.0.22",
+    "typescript": "^5.0.3"
   }
 }
