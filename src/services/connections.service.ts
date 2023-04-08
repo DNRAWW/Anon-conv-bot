@@ -1,4 +1,3 @@
-import { Model } from "mongoose";
 import { ConnectionModel } from "../models";
 import { redisConnection } from "../redisConnection";
 import { UserStatusService } from "./userStatus.service";
@@ -16,10 +15,11 @@ export class ConnectionsService {
   }
 
   async getConnectionByUser(userId: number) {
-    const connection = await this.connectionModel.findOne(
-      { userId1: userId },
-      { userId2: userId }
-    );
+    const connection = await this.connectionModel.findOne({
+      $or: [{ userId1: userId }, { userId2: userId }],
+    });
+
+    console.log(connection);
 
     return connection;
   }

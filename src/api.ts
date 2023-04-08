@@ -5,10 +5,6 @@ import { QueueService } from "./services/queue.service";
 import { UserStatusService } from "./services/userStatus.service";
 import { ConnectionsService } from "./services/connections.service";
 
-function getRandomNumber(min: number, max: number) {
-  return Math.random() * (max - min) + min;
-}
-
 export function configureBot(bot: Telegraf<Context<Update>>) {
   const userStatusService = new UserStatusService();
   const queueService = new QueueService(userStatusService);
@@ -22,7 +18,7 @@ export function configureBot(bot: Telegraf<Context<Update>>) {
     const userStatus = await userStatusService.getUserStatus(ctx.chat.id);
 
     if (userStatus) {
-      ctx.reply("Вы уже подключены или находитесь в очереди");
+      ctx.reply("Вы уже в разговоре или находитесь в очереди");
       return;
     }
 
@@ -55,7 +51,7 @@ export function configureBot(bot: Telegraf<Context<Update>>) {
     }
 
     const userId2 =
-      userId === connection.userId1 ? connection.userId1 : connection.userId2;
+      userId === connection.userId1 ? connection.userId2 : connection.userId1;
 
     ctx.reply("Разговор остановлен");
     bot.telegram.sendMessage(
@@ -69,20 +65,22 @@ export function configureBot(bot: Telegraf<Context<Update>>) {
   bot.on(message("text"), async (ctx) => {
     const userId = ctx.chat.id;
     const userStatus = await userStatusService.getUserStatus(userId);
-    if (userStatus === "connected") {
-      const connection = await connectionsService.getConnectionByUser(userId);
 
-      if (!connection) {
-        throw Error("Something went wrong here with connection");
-      }
-
-      const userId2 =
-        userId === connection.userId1 ? connection.userId1 : connection.userId2;
-
-      const message = ctx.message.text;
-      bot.telegram.sendMessage(userId2 as number, message);
-    } else {
+    if (userStatus !== "connected") {
       ctx.reply("Вы не находитесь в разговоре или такой команды нет");
+      return;
     }
+
+    const connection = await connectionsService.getConnectionByUser(userId);
+
+    if (!connection) {
+      throw Error("Something went wrong here with connection");
+    }
+
+    const userId2 =
+      userId === connection.userId1 ? connection.userId2 : connection.userId1;
+
+    const message = ctx.message.text;
+    bot.telegram.sendMessage(userId2 as number, message);
   });
 }
