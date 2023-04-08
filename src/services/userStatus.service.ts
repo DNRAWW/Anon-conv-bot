@@ -8,11 +8,14 @@ export class UserStatusService {
   }
 
   async getUserStatus(id: number) {
-    return await this.redisConnection.hGet("users_status", String(id))
+    return await this.redisConnection.hGet("users_status", String(id));
   }
 
-  async setUserStatus(id: number, status: "searching" | "connected") {
-    await this.redisConnection.hSet("users_status", String(id), status)
+  async setUserStatus(
+    id: number,
+    status: "searching" | "connected" | "writing_bio"
+  ) {
+    await this.redisConnection.hSet("users_status", String(id), status);
   }
 
   async deleteUserStatus(id: number) {

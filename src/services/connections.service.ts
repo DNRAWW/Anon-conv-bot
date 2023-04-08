@@ -42,7 +42,7 @@ export class ConnectionsService {
     }
 
     await this.userStatusService.deleteUserStatus(userId);
-    await this.userStatusService.deleteUserStatus(connection.userId2 as number);
+    await this.userStatusService.deleteUserStatus(connection.userId2);
 
     await this.connectionModel.deleteOne({
       userId1: userId,
