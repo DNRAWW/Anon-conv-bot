@@ -1,7 +1,7 @@
 import { Telegraf } from "telegraf";
 import dotenv from "dotenv";
 import { configureBot } from "./api";
-import { connectToRedis } from "./redisConnection";
+import { connectToRedis, redisConnection } from "./redisConnection";
 import mongoose from "mongoose";
 
 dotenv.config();
@@ -13,8 +13,18 @@ async function main() {
   configureBot(bot);
   bot.launch();
 
-  process.once("SIGINT", () => bot.stop("SIGINT"));
-  process.once("SIGTERM", () => bot.stop("SIGTERM"));
+  process.once("SIGINT", () => {
+    bot.stop("SIGINT");
+    redisConnection.quit();
+  });
+  process.once("SIGTERM", () => {
+    bot.stop("SIGTERM");
+    redisConnection.quit();
+  });
 }
 
-main();
+main().catch((err) => {
+  redisConnection.quit();
+  console.error(err);
+  throw Error();
+});

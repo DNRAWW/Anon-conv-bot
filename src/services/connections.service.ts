@@ -19,8 +19,6 @@ export class ConnectionsService {
       $or: [{ userId1: userId }, { userId2: userId }],
     });
 
-    console.log(connection);
-
     return connection;
   }
 

@@ -39,7 +39,13 @@ export function configureBot(bot: Telegraf<Context<Update>>) {
     const userId = ctx.chat.id;
     const userStatus = await userStatusService.getUserStatus(userId);
 
-    if (!userStatus || userStatus === "searching") {
+    if (userStatus === "searching") {
+      ctx.reply("Поиск прекращён");
+      queueService.deleteUserFromQueue(userId);
+      return;
+    }
+
+    if (!userStatus) {
       ctx.reply("Вы не находитесь в разговоре");
       return;
     }

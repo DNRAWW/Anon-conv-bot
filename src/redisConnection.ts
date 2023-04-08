@@ -1,4 +1,4 @@
-import { createClient } from "redis";
+import { createClient, defineScript } from "redis";
 
 export const redisConnection = createClient();
 
