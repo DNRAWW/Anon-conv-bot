@@ -48,10 +48,20 @@ export function configureBot(bot: Telegraf<Context<Update>>) {
       return;
     }
 
-    const userId2 = connectionsService.getConnectionByUser(userId);
+    const connection = await connectionsService.getConnectionByUser(userId);
+
+    if (!connection) {
+      throw Error("Something went wrong here with connection");
+    }
+
+    const userId2 =
+      userId === connection.userId1 ? connection.userId1 : connection.userId2;
 
     ctx.reply("Разговор остановлен");
-    bot.telegram.sendMessage(userId2, "Разговор был остановлен собеседником");
+    bot.telegram.sendMessage(
+      userId2 as number,
+      "Разговор был остановлен собеседником"
+    );
 
     await connectionsService.stopConnection(userId);
   });
@@ -60,9 +70,17 @@ export function configureBot(bot: Telegraf<Context<Update>>) {
     const userId = ctx.chat.id;
     const userStatus = await userStatusService.getUserStatus(userId);
     if (userStatus === "connected") {
-      const sendTo = connectionsService.getConnectionByUser(userId);
+      const connection = await connectionsService.getConnectionByUser(userId);
+
+      if (!connection) {
+        throw Error("Something went wrong here with connection");
+      }
+
+      const userId2 =
+        userId === connection.userId1 ? connection.userId1 : connection.userId2;
+
       const message = ctx.message.text;
-      bot.telegram.sendMessage(sendTo, message);
+      bot.telegram.sendMessage(userId2 as number, message);
     } else {
       ctx.reply("Вы не находитесь в разговоре или такой команды нет");
     }
